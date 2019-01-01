@@ -1,7 +1,46 @@
 #!/bin/bash
 
-sudo ufw reset
+# VPN name on Network Manager
+VPN_NAME="$(nmcli con | grep nordvpn | awk '{print $1}' | tail)"
+VPN_IP="$(grep "remote " ~/.local/share/nordvpn/ovpn_tcp/$VPN_NAME.ovpn | awk '{print $2}')"
+
+# network device, usually wlan0 for wifi and eth0 for cable
+NW_DEVICE=$(netstat -i | tail -1 | awk '{print $1}')
+
+# local network range
+LOCAL_NW="$(hostname -I | awk '{print $1}')/24"
+
+# VPN connection device
+NW_TUN="tun0"
+
+#
+# Disable ufw and reset all rules to defaults
+#
+sudo ufw --force reset
+
+#
+# Set the default rules to deny everything
+#
 sudo ufw default deny incoming
 sudo ufw default deny outgoing
-sudo ufw allow out on tun0 from any to any
+
+#
+# Allow traffic out on the VPN tunnel adapter
+#
+sudo ufw allow out on $NW_TUN from any to any
+
+#
+# Allow UDP traffic out to the VPN server so VPN client can connect
+#
+sudo ufw allow out on $NW_DEVICE from any to $VPN_IP
+sudo ufw allow out to any port 53
+
+#
+# Allow LAN traffic
+#
+sudo ufw allow from $LOCAL_NW
+
+#
+# Enable ufw. Try to hit anything. It should fail while the VPN is down.
+#
 sudo ufw enable

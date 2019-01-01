@@ -1,6 +1,11 @@
 #!/bin/bash
 
-sudo ufw reset
+# Stop VPN connection
+# VPN_NAME="$(nmcli con | grep nordvpn | awk '{print $1}' | tail)"
+# nmcli con down id $VPN_NAME
+
+# Reset firewall to defaults
+sudo ufw --force reset
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw enable
