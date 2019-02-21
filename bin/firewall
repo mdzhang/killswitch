@@ -44,3 +44,9 @@ sudo ufw allow from $LOCAL_NW
 # Enable ufw. Try to hit anything. It should fail while the VPN is down.
 #
 sudo ufw enable
+
+nmcli con up id $VPN_NAME
+echo -e '\nMonitoring VPN connection for possible drops. Press Ctrl + Z to stop monitoring\n'
+# Will exit as soon as status changes
+nmcli connection monitor $NW_TUN
+echo -e '\n############################\nConnection to VPN dropped\n############################\n'
