@@ -28,17 +28,21 @@ sudo ufw default deny outgoing
 # Allow traffic out on the VPN tunnel adapter
 #
 sudo ufw allow out on $NW_TUN from any to any
+echo "Outbound traffic allowed on $NW_TUN."
 
 #
 # Allow UDP traffic out to the VPN server so VPN client can connect
 #
 sudo ufw allow out on $NW_DEVICE from any to $VPN_IP
+echo "Outbound traffic must go through VPN@$VPN_IP."
 sudo ufw allow out to any port 53
+echo "All traffic allowed to port 53 to setup VPN connection"
 
 #
 # Allow LAN traffic
 #
 sudo ufw allow from $LOCAL_NW
+echo "LAN traffic allowed"
 
 #
 # Enable ufw. Try to hit anything. It should fail while the VPN is down.
@@ -46,6 +50,7 @@ sudo ufw allow from $LOCAL_NW
 sudo ufw enable
 
 nmcli con up id $VPN_NAME
+echo "Ensuring VPN $VPN_NAME connection is up..."
 echo -e '\nMonitoring VPN connection for possible drops. Press Ctrl + Z to stop monitoring\n'
 # Will exit as soon as status changes
 nmcli connection monitor $NW_TUN
